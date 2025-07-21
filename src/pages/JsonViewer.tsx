@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Spin, Alert, Typography, Button, Space } from 'antd';
-import { DownloadOutlined, CopyOutlined } from '@ant-design/icons';
+import {
+  DownloadOutlined,
+  CopyOutlined,
+  TableOutlined,
+} from '@ant-design/icons';
 import ReactJson from 'react-json-view';
 import { useAppSelector } from '@/hooks/useAppDispatch';
 import type { JSONData } from '@/types';
@@ -10,6 +14,7 @@ const { Title } = Typography;
 
 const JsonViewer: React.FC = () => {
   const { fileId } = useParams<{ fileId: string }>();
+  const navigate = useNavigate();
   const { fileList, currentFile } = useAppSelector((state) => state.file);
   const [jsonData, setJsonData] = useState<JSONData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -74,6 +79,12 @@ const JsonViewer: React.FC = () => {
     }
   };
 
+  const handleSwitchToListView = (): void => {
+    if (fileId) {
+      navigate(`/jsonlist/${fileId}`);
+    }
+  };
+
   if (loading) {
     return (
       <div style={{ padding: '24px', textAlign: 'center' }}>
@@ -118,6 +129,9 @@ const JsonViewer: React.FC = () => {
               {jsonData.fileName}
             </Title>
             <Space>
+              <Button icon={<TableOutlined />} onClick={handleSwitchToListView}>
+                列表视图
+              </Button>
               <Button icon={<CopyOutlined />} onClick={handleCopy}>
                 复制 JSON
               </Button>

@@ -2,6 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import MainLayout from '@/components/Layout/MainLayout';
 import Home from '@/pages/Home';
 import JsonViewer from '@/pages/JsonViewer';
+import JsonListViewer from '@/pages/JsonListViewer';
 import ExcelViewer from '@/pages/ExcelViewer';
 
 export const router = createBrowserRouter([
@@ -18,6 +19,14 @@ export const router = createBrowserRouter([
     element: (
       <MainLayout>
         <JsonViewer />
+      </MainLayout>
+    ),
+  },
+  {
+    path: '/jsonlist/:fileId',
+    element: (
+      <MainLayout>
+        <JsonListViewer />
       </MainLayout>
     ),
   },

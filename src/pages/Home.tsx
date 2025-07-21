@@ -1,9 +1,20 @@
 import React from 'react';
-import { Card, Row, Col, Typography, Upload, Space } from 'antd';
+import {
+  Card,
+  Row,
+  Col,
+  Typography,
+  Upload,
+  Space,
+  Dropdown,
+  Button,
+} from 'antd';
 import {
   InboxOutlined,
   FileTextOutlined,
   TableOutlined,
+  DownOutlined,
+  EyeOutlined,
 } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import { useAppSelector, useAppDispatch } from '@/hooks/useAppDispatch';
@@ -47,7 +58,7 @@ const Home: React.FC = () => {
         dispatch(addFile(fileInfo));
         dispatch(setCurrentFile(fileInfo));
 
-        // 根据文件类型导航到相应页面
+        // 根据文件类型导航到相应页面（JSON默认使用树形视图）
         if (fileInfo.type === 'json') {
           navigate(`/json/${fileInfo.id}`);
         } else if (fileInfo.type === 'excel') {
@@ -103,14 +114,42 @@ const Home: React.FC = () => {
     return 'other';
   };
 
-  const handleFileClick = (file: FileInfo): void => {
+  const handleFileClick = (
+    file: FileInfo,
+    viewType?: 'tree' | 'list'
+  ): void => {
     dispatch(setCurrentFile(file));
     if (file.type === 'json') {
-      navigate(`/json/${file.id}`);
+      const route =
+        viewType === 'list' ? `/jsonlist/${file.id}` : `/json/${file.id}`;
+      navigate(route);
     } else if (file.type === 'excel') {
       navigate(`/excel/${file.id}`);
     }
   };
+
+  const getJsonViewMenuItems = (file: FileInfo) => [
+    {
+      key: 'tree',
+      label: (
+        <Space>
+          <FileTextOutlined />
+          树形视图
+        </Space>
+      ),
+      onClick: () => handleFileClick(file, 'tree'),
+    },
+    {
+      key: 'list',
+      label: (
+        <Space>
+          <TableOutlined />
+          列表视图
+        </Space>
+      ),
+      onClick: () => handleFileClick(file, 'list'),
+    },
+  ];
 
   return (
     <div style={{ padding: '24px' }}>
@@ -153,8 +192,7 @@ const Home: React.FC = () => {
                     <Card
                       hoverable
                       size="small"
-                      onClick={() => handleFileClick(file)}
-                      style={{ cursor: 'pointer' }}
+                      style={{ position: 'relative' }}
                     >
                       <Space
                         direction="vertical"
@@ -183,6 +221,28 @@ const Home: React.FC = () => {
                           <div style={{ fontSize: '12px', color: '#666' }}>
                             {(file.size / 1024).toFixed(2)} KB
                           </div>
+                        </div>
+                        <div style={{ textAlign: 'center', marginTop: '8px' }}>
+                          {file.type === 'json' ? (
+                            <Dropdown
+                              menu={{ items: getJsonViewMenuItems(file) }}
+                              trigger={['click']}
+                            >
+                              <Button size="small" type="primary">
+                                <EyeOutlined />
+                                查看 <DownOutlined />
+                              </Button>
+                            </Dropdown>
+                          ) : (
+                            <Button
+                              size="small"
+                              type="primary"
+                              onClick={() => handleFileClick(file)}
+                            >
+                              <EyeOutlined />
+                              查看
+                            </Button>
+                          )}
                         </div>
                       </Space>
                     </Card>
