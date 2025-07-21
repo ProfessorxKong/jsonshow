@@ -28,30 +28,13 @@ const JsonViewer: React.FC = () => {
         throw new Error('文件未找到');
       }
 
-      // 模拟文件读取（实际项目中需要真实的文件读取逻辑）
-      const mockJsonContent = {
-        name: '示例数据',
-        version: '1.0.0',
-        description: '这是一个示例 JSON 文件',
-        data: {
-          users: [
-            { id: 1, name: '张三', age: 25, email: 'zhangsan@example.com' },
-            { id: 2, name: '李四', age: 30, email: 'lisi@example.com' },
-          ],
-          products: [
-            { id: 1, name: '产品A', price: 99.9, category: '电子产品' },
-            { id: 2, name: '产品B', price: 199.9, category: '家居用品' },
-          ],
-        },
-        metadata: {
-          createdAt: '2024-01-01T00:00:00Z',
-          updatedAt: '2024-01-15T12:30:00Z',
-          author: '系统管理员',
-        },
-      };
+      // 检查文件是否有内容
+      if (!file.content) {
+        throw new Error('文件内容为空或未能正确读取');
+      }
 
       const data: JSONData = {
-        content: mockJsonContent,
+        content: file.content,
         fileName: file.name,
         isValid: true,
       };

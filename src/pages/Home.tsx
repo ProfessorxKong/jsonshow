@@ -20,22 +20,71 @@ const Home: React.FC = () => {
   const { fileList } = useAppSelector((state) => state.file);
 
   const handleFileUpload = (file: File): boolean => {
-    const fileInfo: FileInfo = {
-      id: `${Date.now()}-${file.name}`,
-      name: file.name,
-      type: getFileType(file.name),
-      size: file.size,
-      lastModified: new Date(file.lastModified),
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        let content: unknown;
+        const fileType = getFileType(file.name);
+
+        if (fileType === 'json') {
+          // 解析 JSON 文件
+          content = JSON.parse(e.target?.result as string);
+        } else {
+          // 其他文件类型暂时存储原始内容
+          content = e.target?.result;
+        }
+
+        const fileInfo: FileInfo = {
+          id: `${Date.now()}-${file.name}`,
+          name: file.name,
+          type: fileType,
+          size: file.size,
+          lastModified: new Date(file.lastModified),
+          content: content,
+        };
+
+        dispatch(addFile(fileInfo));
+        dispatch(setCurrentFile(fileInfo));
+
+        // 根据文件类型导航到相应页面
+        if (fileInfo.type === 'json') {
+          navigate(`/json/${fileInfo.id}`);
+        } else if (fileInfo.type === 'excel') {
+          navigate(`/excel/${fileInfo.id}`);
+        }
+      } catch (error) {
+        console.error('文件解析失败:', error);
+        // 即使解析失败也创建文件信息，但标记为有错误
+        const fileInfo: FileInfo = {
+          id: `${Date.now()}-${file.name}`,
+          name: file.name,
+          type: getFileType(file.name),
+          size: file.size,
+          lastModified: new Date(file.lastModified),
+        };
+
+        dispatch(addFile(fileInfo));
+        dispatch(setCurrentFile(fileInfo));
+
+        if (fileInfo.type === 'json') {
+          navigate(`/json/${fileInfo.id}`);
+        } else if (fileInfo.type === 'excel') {
+          navigate(`/excel/${fileInfo.id}`);
+        }
+      }
     };
 
-    dispatch(addFile(fileInfo));
-    dispatch(setCurrentFile(fileInfo));
+    reader.onerror = () => {
+      console.error('文件读取失败');
+    };
 
-    // 根据文件类型导航到相应页面
-    if (fileInfo.type === 'json') {
-      navigate(`/json/${fileInfo.id}`);
-    } else if (fileInfo.type === 'excel') {
-      navigate(`/excel/${fileInfo.id}`);
+    // 根据文件类型选择读取方式
+    const fileType = getFileType(file.name);
+    if (fileType === 'json') {
+      reader.readAsText(file, 'utf-8');
+    } else {
+      reader.readAsArrayBuffer(file);
     }
 
     return false; // 阻止自动上传
